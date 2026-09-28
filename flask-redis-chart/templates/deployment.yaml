@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-flask-app
+spec:
+  replicas: {{ .Values.flaskApp.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-flask-app
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-flask-app
+    spec:
+      containers:
+        - name: flask-app
+          image: "{{ .Values.flaskApp.image }}:{{ .Values.flaskApp.tag }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.flaskApp.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD
+          resources:
+            requests:
+              cpu: {{ .Values.flaskApp.resources.requests.cpu }}
+              memory: {{ .Values.flaskApp.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.flaskApp.resources.limits.cpu }}
+              memory: {{ .Values.flaskApp.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.flaskApp.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.flaskApp.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5

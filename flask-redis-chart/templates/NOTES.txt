@@ -1,0 +1,13 @@
+Your Flask + Redis app has been deployed as release "{{ .Release.Name }}".
+
+Visit your app at:
+  http://{{ .Values.ingress.host }}
+
+(Remember: this hostname must resolve to your ingress controller's node IP,
+via /etc/hosts or real DNS, and traffic goes through the ingress-nginx
+controller's exposed NodePort.)
+
+Useful commands:
+  kubectl get pods -l app={{ .Release.Name }}-flask-app
+  kubectl logs -l app={{ .Release.Name }}-flask-app
+  helm status {{ .Release.Name }}

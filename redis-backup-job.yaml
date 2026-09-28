@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: redis-backup
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 60
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: backup
+          image: redis:7-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Starting Redis backup at $(date)"
+              redis-cli -h redis -a "$REDIS_PASSWORD" --no-auth-warning BGSAVE
+              sleep 3
+              redis-cli -h redis -a "$REDIS_PASSWORD" --no-auth-warning LASTSAVE
+              echo "Backup triggered successfully"
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD

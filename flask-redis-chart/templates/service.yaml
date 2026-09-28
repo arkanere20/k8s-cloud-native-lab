@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-flask-app
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Release.Name }}-flask-app
+  ports:
+    - port: {{ .Values.flaskApp.port }}
+      targetPort: {{ .Values.flaskApp.port }}
